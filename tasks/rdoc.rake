@@ -11,7 +11,9 @@ begin
     rdoc.rdoc_dir = 'rdoc'
     rdoc.title = "Juicer #{version}"
     rdoc.rdoc_files.include('README*')
-    rdoc.rdoc_files.include('lib/**/*.rb')
+    rdoc.rdoc_files.include('lib/juicer.rb')
+    rdoc.rdoc_files.include('lib/juicer/**/*.rb')
+    # rdoc.options += ['-f', 'darkfish']
   end
 rescue LoadError => err
 end
