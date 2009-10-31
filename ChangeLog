@@ -1,0 +1,36 @@
+== 0.9.99/1.0.0-preview1 / 2009-12-xx
+* Almost complete rewrite: New solid APIs for interacting with Juicer through
+  Ruby code. Solid documentation of new APIs. More granular command-line
+  operations. Command-line binary acts like a real command-line tool,
+  reading from STDIN, writing to STDOUT, using exit codes and so on.
+
+== 0.2.6 / 2009-07-20
+* New installation paths for YUI Compressor
+  Patch by http://github.com/craveytrain
+
+== 0.2.5 / 2009-05-22
+* Fixed a bug with the stylesheet merger where url( <url> ); (ie URL surrounded
+  by spaces) resolved wrong.
+
+== 0.2.4 / 2009-04-29
+
+* More robust pattern checking for url() references in CSS files
+* Allow skipping verification
+* Bug fix: Skip cache buster if type=none
+* Bug fix: Quote JsLint command parts to allow for spaces in jar file paths
+* Bug fix: cache buster type wasn't carried all the way (ie had no effect)
+
+== 0.2.3 / 2009-03-03
+
+* Cache busters in CSS files should only be appended once to each URL
+* Output to merge target should accept directories as well as files (in case of
+  directories, file name is generated)
+* Tests should not ship with 3rd party libraries
+
+== 0.2.0 / 2009-02-25
+
+* First usable release; merge, verify, install targets
+
+== 0.1.0 / 2008-12-17
+
+* Dug up old project and set it up with Mr Bones
