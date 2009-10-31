@@ -9,7 +9,7 @@ begin
     end
 
     rdoc.rdoc_dir = 'rdoc'
-    rdoc.title = "jstdutil #{version}"
+    rdoc.title = "Juicer #{version}"
     rdoc.rdoc_files.include('README*')
     rdoc.rdoc_files.include('lib/**/*.rb')
   end
