@@ -156,9 +156,9 @@ module Juicer
     # Locate the binary to execute. The binary is searched for in the
     # following places:
     #
-    # 1) The paths specified through my_binary.path
-    # 2) The path specified by the given environment variable
-    # 3) Current working directory
+    # 1. The paths specified through my_binary.path
+    # 2. The path specified by the given environment variable
+    # 3. Current working directory
     #
     # The name of the binary may be a glob pattern, resulting in +locate+
     # returning an array of matches. This is useful in cases where the path

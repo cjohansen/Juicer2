@@ -1,5 +1,10 @@
 begin
-  require 'rake/rdoctask'
+  begin
+    require 'hanna/rdoctask'
+  rescue LoadError
+    require 'rake/rdoctask'
+    puts "Missing the hanna gem, using default RDoc theme"
+  end
 
   Rake::RDocTask.new do |rdoc|
     if File.exist?('VERSION')
