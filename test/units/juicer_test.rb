@@ -1,7 +1,14 @@
 require "test_helper"
 
 class JuicerTest < Test::Unit::TestCase
-  context "environment" do
+  context "juicer environment" do
+    setup do
+      @env = ENV["JUICER_ENV"]
+      ENV.delete("JUICER_ENV")
+    end
+    
+    teardown { ENV["JUICER_ENV"] = @env }
+
     should "be default" do
       assert_equal "default", Juicer.env
     end
@@ -10,6 +17,14 @@ class JuicerTest < Test::Unit::TestCase
       Juicer.env = "dev"
 
       assert_equal "dev", Juicer.env
+    end
+
+    context "configured in user environment" do
+      should "use environment variable JUICER_ENV" do
+        env = "my-app"
+        ENV["JUICER_ENV"] = env
+        assert_equal env, Juicer.env
+      end
     end
   end
 

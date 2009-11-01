@@ -56,7 +56,7 @@
 module Juicer
   VERSION = "0.9.99"
   @@home = nil
-  @@env = "default"
+  @@env = nil
 
   # Returns the version string for the library.
   #
@@ -93,7 +93,7 @@ module Juicer
   end
 
   def self.env
-    @@env
+    [@@env, ENV['JUICER_ENV'], "default"].find { |env| !env.nil? && env != "" }
   end
 
   def self.env=(env)
