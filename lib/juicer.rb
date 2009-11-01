@@ -56,6 +56,7 @@
 module Juicer
   VERSION = "0.9.99"
   @@home = nil
+  @@env = "default"
 
   # Returns the version string for the library.
   #
@@ -79,5 +80,23 @@ module Juicer
   #
   def self.home=(home)
     @@home = home
+  end
+
+  # Returns the Juicer load path
+  #
+  def self.load_path
+    Dir.glob(File.join(Juicer.pkg_dir, "**/lib"))
+  end
+
+  def self.pkg_dir
+    File.join(Juicer.home, "packages", self.env)
+  end
+
+  def self.env
+    @@env
+  end
+
+  def self.env=(env)
+    @@env = env
   end
 end

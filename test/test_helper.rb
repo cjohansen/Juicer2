@@ -3,9 +3,12 @@ begin
   require 'shoulda'
   require 'mocha'
   require 'open-uri'
+  require 'fakefs'
+  require 'fileutils'
+  require 'stringio'
   require 'juicer'
 rescue LoadError => err
-  puts "To run the Juicer test suite you need Test::Unit, shoulda, mocha and open-uri"
+  puts "To run the Juicer test suite you need Test::Unit, shoulda, mocha, fakefs and open-uri"
   puts err
   exit
 end
