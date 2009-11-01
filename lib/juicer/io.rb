@@ -19,7 +19,7 @@ module Juicer
       @file = nil
 
       if stream_like.nil?
-        @stream = StringIO.new("", mode)
+        @stream = StringIO.new("", @mode)
       elsif stream_like.is_a?(String) && File.exists?(stream_like)
         @file = stream_like
         @stream = nil
@@ -27,25 +27,6 @@ module Juicer
         @stream = stream_like
       else
         @stream = StringIO.new(stream_like, @mode)
-      end
-    end
-
-    def method_missing(name, *args, &block)
-      return @stream.send(name, *args, &block) if @stream
-
-      stream = nil
-
-      if @file
-        begin
-          stream = File.open(@file, @mode)
-          stream.send(name, *args, &block)
-        rescue Exception => err
-          raise err
-        ensure
-          stream.close
-        end
-      else
-        super
       end
     end
 
@@ -85,12 +66,34 @@ module Juicer
     #                      "file name-like"
     #
     def self.load(ios, load_path = Juicer.load_path)
+      return ios if ios.is_a?(Juicer::IO)
+      
       if ios.is_a?(String) && !load_path.nil?
         path = load_path.find { |path| File.exists?(File.join(path, ios)) }
         ios = File.join(path, ios) unless path.nil?
       end
 
       Juicer::IO.new(ios)
+    end
+
+   private
+    def method_missing(name, *args, &block)
+      return @stream.send(name, *args, &block) if @stream
+
+      stream = nil
+
+      if @file
+        begin
+          stream = File.open(@file, @mode)
+          stream.send(name, *args, &block)
+        rescue Exception => err
+          raise err
+        ensure
+          stream.close
+        end
+      else
+        super
+      end
     end
   end
 end
