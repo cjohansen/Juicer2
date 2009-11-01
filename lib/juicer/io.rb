@@ -14,48 +14,56 @@ module Juicer
     # Creates a new Juicer::IO. Accepts strings, IO streams and file names.
     # If no argument is provided, the IO will wrap a StringIO
     #
-    def initialize(stream_like = nil, mode = "rw")
-      @mode = mode
+    def initialize(stream_like = nil, mode = "r+")
+      @mode = mode || "r+"
       @file = nil
 
       if stream_like.nil?
         @stream = StringIO.new("", mode)
-      elsif File.exists?(stream_like)
+      elsif stream_like.is_a?(String) && File.exists?(stream_like)
         @file = stream_like
         @stream = nil
       elsif stream_like.respond_to?(:read)
         @stream = stream_like
       else
-        @stream = StringIO.new(stream_like, mode)
+        @stream = StringIO.new(stream_like, @mode)
       end
     end
 
     def method_missing(name, *args, &block)
-      return @stream.send(name, args, &block) if @stream
+      return @stream.send(name, *args, &block) if @stream
 
       stream = nil
 
       if @file
         begin
           stream = @file.open(@mode)
-          stream.send(name, args, &block)
+          return stream.send(name, args, &block)
         rescue Exception => err
-          stream.close unless stream.closed?
           raise err
+        ensure
+          stream.close unless stream.closed?
         end
       end
 
       super
     end
 
-    def self.open(stream_like, mode)
-      ios = Juicer::IO.new(stream_like, mode)
+    def inspect
+      "Juicer::IO<#{@file || @stream}>"
+    end
+
+    def self.open(stream_like, mode = nil)
+      ios = self.new(stream_like, mode)
+      results = nil
 
       begin
-        yield ios
+        results = yield ios if block_given?
       ensure
         ios.close unless ios.closed?
       end
+
+      results
     end
   end
 end

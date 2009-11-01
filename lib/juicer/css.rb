@@ -84,12 +84,32 @@ module Juicer
     attr_reader :io
 
     #
-    # Creates a new CSS resource
+    # Creates a new CSS resource. Accepts a wide variety of input options:
+    # * A file name of an existing CSS file
+    # * An io object
+    # * A string of CSS content
+    # * Nothing - creates a new empty CSS resource
     #
-    def initialize(io_like = nil, options = {})
-      @io = Juicer::IO.new(io_like)
+    # Additionally, you may provide an array with a mix of the above, or several
+    # arguments, also mixing the above. In any case you can provide an options
+    # hash as the last argument
+    #
+    def initialize(*args)
+      args.flatten!
+      @options = {}
       @dependencies = nil
       @added_dependencies = []
+
+      if args[-1].is_a?(Hash)
+        @options.merge!(args.pop)
+      end
+
+      if args.length > 1
+        @io = Juicer::IO.new
+        self.import(Juicer::Css.new(args.shift)) while args.length > 0
+      else
+        @io = Juicer::IO.new(args[0])
+      end
     end
 
     #
