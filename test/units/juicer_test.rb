@@ -33,7 +33,7 @@ class JuicerTest < Test::Unit::TestCase
       lib = "observable-1.0.0"
       create_lib(lib)
 
-      assert_equal [File.join(Juicer.home, "packages", Juicer.env, lib, "lib")], Juicer.load_path
+      assert_equal [Dir.pwd, File.join(Juicer.home, "packages", Juicer.env, lib, "lib")], Juicer.load_path
     end
 
     should "use custom Juicer home and env" do
@@ -44,7 +44,7 @@ class JuicerTest < Test::Unit::TestCase
       lib = "observable-1.0.0"
       create_lib(lib)
 
-      assert_equal [File.join(home, "packages", env, lib, "lib")], Juicer.load_path
+      assert_equal [Dir.pwd, File.join(home, "packages", env, lib, "lib")], Juicer.load_path
     end
   end
 

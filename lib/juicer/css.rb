@@ -81,7 +81,7 @@ module Juicer
   # License::   BSD
   #
   class Css
-    attr_reader :io
+    # attr_reader :io
 
     #
     # Creates a new CSS resource. Accepts a wide variety of input options:
@@ -138,7 +138,7 @@ module Juicer
     end
 
     def depend(resource)
-      @added_dependencies.push(Juicer::CSS.open(resource))
+      @added_dependencies.push(Juicer::Css.open(resource))
     end
 
     alias << depend
@@ -150,8 +150,8 @@ module Juicer
     end
 
     def self.open(stream_like)
-      return stream_like if stream_like.is_a?(Juicer::CSS)
-      Juicer::CSS.new(stream_like)
+      return stream_like if stream_like.is_a?(Juicer::Css)
+      Juicer::Css.new(stream_like)
     end
   end
 end

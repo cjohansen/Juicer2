@@ -64,4 +64,18 @@ class IOTest < Test::Unit::TestCase
       assert_equal contents, Juicer::IO.open(contents) { |ios| contents }
     end
   end
+
+  context "loading IO resources" do
+    should "find file from load path" do
+      filename = "humanity/myfile.css"
+      file = File.join(Juicer.pkg_dir, "myapp/lib", filename)
+      contents = "body, html, * {}"
+      FileUtils.mkdir_p(File.dirname(file))
+      File.open(file, "w") { |f| f.puts contents }
+
+      io = Juicer::IO.load(filename)
+
+      assert_equal "#{contents}\n", io.read
+    end
+  end
 end

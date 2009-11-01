@@ -82,10 +82,11 @@ module Juicer
     @@home = home
   end
 
-  # Returns the Juicer load path
+  # Returns the Juicer load path. The current working directory is always
+  # prepended to this path.
   #
   def self.load_path
-    Dir.glob(File.join(Juicer.pkg_dir, "**/lib"))
+    Dir.glob(File.join(Juicer.pkg_dir, "**/lib")).unshift(Dir.pwd)
   end
 
   def self.pkg_dir
