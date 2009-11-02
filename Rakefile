@@ -1,5 +1,5 @@
 require "rake"
 
-%w{jeweler test rdoc rcov version}.each do |file|
-  load(File.join("tasks", "#{file}.rake"))
+Dir.glob("tasks/*.rake").each do |file|
+  load(file)
 end
