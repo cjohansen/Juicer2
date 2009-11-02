@@ -116,12 +116,12 @@ module Juicer
     # <tt>true</tt>, all nested dependencies will be load. The default value is
     # <tt>false</tt>, producing a list of files directly depended on by the
     # resource. Dependencies are returned as an array of <tt>Juicer::CSS</tt>
-    # objects. Files are resolved through <tt>Juicer::IOProxy</tt>, meaning they can
-    # exist anywhere on <tt>Juicer.load_path</tt>, not necessarily in the
+    # objects. Files are resolved through <tt>Juicer::IOProxy</tt>, meaning they
+    # can exist anywhere on <tt>Juicer.load_path</tt>, not necessarily in the
     # current directory.
     #
     # If a block is given, each dependency is yielded to the block. The block
-    # exclude certain dependencies by returning false. Any non-false return
+    # may exclude certain dependencies by returning false. Any non-false return
     # value from the block includes the file in the returned collection.
     #
     def dependencies(options = {})

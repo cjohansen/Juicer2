@@ -28,6 +28,12 @@ class IOProxyTest < Test::Unit::TestCase
       StringIO.expects(:new).with(str, "r+")
       io = Juicer::IOProxy.new(str)
     end
+
+    should "fail for unsupported input" do
+      assert_raise ArgumentError do
+        Juicer::IOProxy.new({})
+      end
+    end
   end
   
   context "opening io" do
@@ -54,6 +60,13 @@ class IOProxyTest < Test::Unit::TestCase
 
       assert_equal contents, Juicer::IOProxy.open(contents) { |ios| contents }
     end
+
+    should "run on instance" do
+      contents = "some string inside here"
+      ios = Juicer::IOProxy.new(contents)
+
+      assert_equal contents, ios.open { |stream| stream.read }
+    end
   end
 
   context "loading IOProxy resources" do
@@ -67,6 +80,18 @@ class IOProxyTest < Test::Unit::TestCase
       io = Juicer::IOProxy.load(filename)
 
       assert_equal "#{contents}\n", io.open { |stream| stream.read }
+    end
+
+    should "re-raise error for bad input" do
+      assert_raises ArgumentError do
+        Juicer::IOProxy.load([])
+      end
+    end
+
+    should "return object directly if it is an IOProxy" do
+      proxy = Juicer::IOProxy.new
+
+      assert_equal proxy, Juicer::IOProxy.load(proxy)
     end
   end
 end

@@ -27,8 +27,10 @@ module Juicer
         @stream = nil
       elsif stream_like.respond_to?(:read)
         @stream = stream_like
-      else
+      elsif stream_like.is_a?(String)
         @stream = StringIO.new(stream_like, @mode)
+      else
+        raise ArgumentError.new("IOProxy should wrap a string, io object or file, got #{stream_like.class}")
       end
     end
 
@@ -79,12 +81,14 @@ module Juicer
       return ios if ios.is_a?(Juicer::IOProxy)
       load_path ||= Juicer.load_path
 
-      if ios.is_a?(String) && !load_path.nil?
+      if ios.is_a?(String)
         path = load_path.find { |path| File.exists?(File.join(path, ios)) }
         ios = File.join(path, ios) unless path.nil?
       end
 
       Juicer::IOProxy.new(ios)
+    rescue StandardError => err
+      raise err
     end
   end
 end
