@@ -1,4 +1,4 @@
-require "juicer/io"
+require "juicer/io_proxy"
 
 module Juicer
   #
@@ -7,21 +7,21 @@ module Juicer
   # or IO stream. This result can then be fed to a compressor for compact
   # results.
   #
-  # <tt>Juicer::Css</tt> supports several custom observation points, where
+  # <tt>Juicer::CSS</tt> supports several custom observation points, where
   # you can insert custom modules to process CSS as it's being moved between
   # files, merged and compressed.
   #
   # = Examples
   #
   # Create a new CSS object (ie, not referring to an existing file on disk)
-  #   css = Juicer::Css.new
+  #   css = Juicer::CSS.new
   #
   # Same as <tt>@import url(myfile.css);</tt> from a CSS file: depend on another
   # CSS resource.
-  #   css.depend Juicer::Css.new("myfile.css")
+  #   css.depend Juicer::CSS.new("myfile.css")
   #
   # You can depend on the file directly, Juicer will wrap it in a
-  # <tt>Juicer::Css</tt> object for you
+  # <tt>Juicer::CSS</tt> object for you
   #   css.depend "myfile.css"
   #
   # <tt>import</tt> is an alias for <tt>depend</tt>
@@ -31,10 +31,10 @@ module Juicer
   #   css << "myfile.css"
   #
   # List all dependencies
-  #   css.dependencies #=> [#<Juicer::Css:"myfile.css">]
+  #   css.dependencies #=> [#<Juicer::CSS:"myfile.css">]
   #
   # List all resources. This includes self in the list:
-  #   css.resources    #=> [#<Juicer::Css:[unsaved]>, #<Juicer::Css:"myfile.css">]
+  #   css.resources    #=> [#<Juicer::CSS:[unsaved]>, #<Juicer::CSS:"myfile.css">]
   #
   # Export the CSS resource to a file. Will include <tt>@import</tt> statements
   # for any dependencies
@@ -68,19 +68,19 @@ module Juicer
   # Of course, any IO stream is acceptable
   #   css.export(StringIO.new)
   #
-  # Wrap an existing CSS resource in a <tt>Juicer::Css</tt> instance
-  #   css = Juicer::Css.new("myfile.css")
-  #   css.dependencies # Lists all @import'ed files (recursively) as Juicer::Css objects
+  # Wrap an existing CSS resource in a <tt>Juicer::CSS</tt> instance
+  #   css = Juicer::CSS.new("myfile.css")
+  #   css.dependencies # Lists all @import'ed files (recursively) as Juicer::CSS objects
   #
   # Add an observer to the concat operation. Adds cache busters to all URLS,
-  # one Css resource at a time
-  #   css.observe :before_concat, Juicer::CssCacheBuster.new
+  # one CSS resource at a time
+  #   css.observe :before_concat, Juicer::CSSCacheBuster.new
   #
   # Author::    Christian Johansen (christian@cjohansen.no)
   # Copyright:: Copyright (c) 2009 Christian Johansen
   # License::   BSD
   #
-  class Css
+  class CSS
     #
     # Creates a new CSS resource. Accepts a wide variety of input options:
     # * A file name of an existing CSS file
@@ -95,18 +95,17 @@ module Juicer
     def initialize(*args)
       args.flatten!
       @options = {}
-      @dependencies = nil
-      @added_dependencies = []
+      @dependencies = []
 
       if args[-1].is_a?(Hash)
         @options.merge!(args.pop)
       end
 
       if args.length > 1
-        @io = Juicer::IO.new
-        self.import(Juicer::Css.new(args.shift, @options)) while args.length > 0
+        @io = Juicer::IOProxy.new
+        self.import(Juicer::CSS.new(args.shift, @options)) while args.length > 0
       else
-        @io = Juicer::IO.load(args[0], @options[:load_path])
+        @io = Juicer::IOProxy.load(args[0], @options[:load_path])
       end
     end
 
@@ -116,23 +115,33 @@ module Juicer
     # options hash which can specify the <tt>:recursive</tt> option. If
     # <tt>true</tt>, all nested dependencies will be load. The default value is
     # <tt>false</tt>, producing a list of files directly depended on by the
-    # resource. Dependencies are returned as an array of <tt>Juicer::Css</tt>
-    # objects. Files are resolved through <tt>Juicer::IO</tt>, meaning they can
+    # resource. Dependencies are returned as an array of <tt>Juicer::CSS</tt>
+    # objects. Files are resolved through <tt>Juicer::IOProxy</tt>, meaning they can
     # exist anywhere on <tt>Juicer.load_path</tt>, not necessarily in the
     # current directory.
     #
+    # If a block is given, each dependency is yielded to the block. The block
+    # exclude certain dependencies by returning false. Any non-false return
+    # value from the block includes the file in the returned collection.
+    #
     def dependencies(options = {})
-      return @dependencies unless @dependencies.nil?
-      @dependencies = @added_dependencies + []
+      # @io.open do |stream|
+      #   while !stream.eof?
+        
+      #   end
+      # end
+
+      dependencies = []
+      dependencies = @dependencies
     end
 
     #
-    # Lists all <tt>Juicer::Css</tt> instances that make up this resource,
+    # Lists all <tt>Juicer::CSS</tt> instances that make up this resource,
     # including this instance. The options hash is passed to #dependencies,
     # refer to its documentation for possible options.
     #
     def resources(options = {})
-      [file] + dependencies(options)
+      [self] + dependencies(options)
     end
 
     #
@@ -143,17 +152,17 @@ module Juicer
     # avoid loading dependencies twice.
     #
     def read(options = {})
-      @io.read
+      @io.open { |stream| stream.read }
     end
 
     #
     # Export the CSS contents to an output. The output is wrapped in a
-    # <tt>Juicer::IO</tt> object, meaning you can provide it any one of the
-    # inputs <tt>Juicer::IO.new</tt> accepts. The options hash is passed to
+    # <tt>Juicer::IOProxy</tt> object, meaning you can provide it any one of the
+    # inputs <tt>Juicer::IOProxy.new</tt> accepts. The options hash is passed to
     # #read, refer to its documentation for possible options to provide.
     #
     def export(stream_like, options = {})
-      Juicer::IO.open(stream_like, "w") { |ios| ios.write(read(options)) }
+      Juicer::IOProxy.open(stream_like, "w") { |ios| ios.write(read(options)) }
     end
 
     #
@@ -165,12 +174,12 @@ module Juicer
     end
 
     #
-    # Add a dependency. Accepts <tt>Juicer::Css</tt> instances,
-    # <tt>Juicer::IO</tt> instances, or any other input accepted by
-    # <tt>Juicer::IO.new</tt>, i.e., file names, string content or io streams.
+    # Add a dependency. Accepts <tt>Juicer::CSS</tt> instances,
+    # <tt>Juicer::IOProxy</tt> instances, or any other input accepted by
+    # <tt>Juicer::IOProxy.new</tt>, i.e., file names, string content or io streams.
     #
     def depend(resource)
-      @added_dependencies.push(Juicer::Css.open(resource))
+      @dependencies.push(Juicer::CSS.open(resource))
     end
 
     alias << depend
@@ -185,14 +194,23 @@ module Juicer
     end
 
     #
-    # Open a <tt>Juicer::Css</tt> instance. If input is already a
-    # <tt>Juicer::Css</tt> instance, it is returned directly. Otherwise, the
-    # input is passed directly to <tt>Juicer::Css.new</tt>. In either case, a
-    # <tt>Juicer::Css</tt> instance is returned.
+    # Returns the name of the file the CSS resource wraps, if any. If the
+    # resource does not wrap a file (i.e., it's an io stream, or CSS string),
+    # the method returns <tt>nil</tt>.
+    #
+    def file
+      @io.file
+    end
+
+    #
+    # Open a <tt>Juicer::CSS</tt> instance. If input is already a
+    # <tt>Juicer::CSS</tt> instance, it is returned directly. Otherwise, the
+    # input is passed directly to <tt>Juicer::CSS.new</tt>. In either case, a
+    # <tt>Juicer::CSS</tt> instance is returned.
     #
     def self.open(stream_like)
-      return stream_like if stream_like.is_a?(Juicer::Css)
-      Juicer::Css.new(stream_like)
+      return stream_like if stream_like.is_a?(Juicer::CSS)
+      Juicer::CSS.new(stream_like)
     end
   end
 end
