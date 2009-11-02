@@ -22,7 +22,7 @@ module Juicer
 
       if stream_like.nil?
         @stream = StringIO.new("", @mode)
-      elsif stream_like.is_a?(String) && File.exists?(stream_like)
+      elsif is_file?(stream_like)
         @file = stream_like
         @stream = nil
       elsif stream_like.respond_to?(:read)
@@ -84,7 +84,7 @@ module Juicer
       return ios if ios.is_a?(Juicer::IOProxy)
       load_path ||= Juicer.load_path
 
-      if ios.is_a?(String)
+      if ios.is_a?(String) && ios !~ /\n/
         path = load_path.find { |path| File.exists?(File.join(path, ios)) }
         ios = File.join(path, ios) unless path.nil?
       end
@@ -92,6 +92,11 @@ module Juicer
       Juicer::IOProxy.new(ios)
     rescue ArgumentError => err
       raise err
+    end
+
+    private
+    def is_file?(stream_like)
+      stream_like.is_a?(String) && stream_like !~ /\n/ && File.exists?(stream_like)
     end
   end
 end

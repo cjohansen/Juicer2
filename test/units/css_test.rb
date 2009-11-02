@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 require "test_helper"
 require "juicer/css"
 
@@ -19,7 +21,8 @@ class CSSTest < Test::Unit::TestCase
 
     should "wrap existing resource" do
       resource = "file.css"
-      Juicer::IOProxy.expects(:new).with(resource)
+      instance = Juicer::IOProxy.new(resource)
+      Juicer::IOProxy.expects(:new).with(resource).returns(instance)
       css = Juicer::CSS.new(resource)
 
       assert_equal 0, css.dependencies.length
@@ -131,6 +134,40 @@ class CSSTest < Test::Unit::TestCase
       assert_raise ArgumentError do
         Juicer::CSS.open(Juicer)
       end
+    end
+  end
+
+  context "resolving dependencies" do
+    setup do
+      @files = %w[myfile.css some/other/file.css third.css]
+
+      @files.each do |file|
+        FileUtils.mkdir_p(File.dirname(file))
+        FileUtils.touch(file)
+      end
+    end
+
+    teardown do
+      @files.each { |file| FileUtils.rm_rf(file) }
+    end
+
+    should "load added dependencies" do
+      css = Juicer::CSS.new(StringIO.new, StringIO.new, StringIO.new)
+
+      assert_equal 3, css.dependencies.length
+    end
+
+    should "load dependencies from CSS imports" do
+      css = Juicer::CSS.new(<<-CSS)
+        @import "#{@files[0]}"
+        @import url('#{@files[1]}');
+        @import  '#{@files[2]}';
+      CSS
+
+      expected = @files.collect { |f| File.expand_path(f) }
+      actual = css.dependencies.collect { |dep| dep.file }
+
+      assert_equal expected, actual
     end
   end
 end

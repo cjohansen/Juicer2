@@ -34,6 +34,15 @@ class IOProxyTest < Test::Unit::TestCase
         Juicer::IOProxy.new({})
       end
     end
+
+    should "not fail on input with newlines" do
+      assert_nothing_raised do
+        Juicer::IOProxy.new(<<-TEXT)
+        Some text
+        Goes in here
+        TEXT
+      end
+    end
   end
   
   context "opening io" do
@@ -99,6 +108,15 @@ class IOProxyTest < Test::Unit::TestCase
       proxy = Juicer::IOProxy.new
 
       assert_equal proxy, Juicer::IOProxy.load(proxy)
+    end
+
+    should "not fail on input with newlines" do
+      assert_nothing_raised do
+        Juicer::IOProxy.load(<<-TEXT)
+        Some text
+        Goes in here
+        TEXT
+      end
     end
   end
 end

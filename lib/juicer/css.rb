@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 require "juicer/io_proxy"
 require "fileutils"
 
@@ -131,14 +133,20 @@ module Juicer
     # value from the block includes the file in the returned collection.
     #
     def dependencies(options = {})
-      # @io.open do |stream|
-      #   while !stream.eof?
-        
-      #   end
-      # end
-
       dependencies = []
-      dependencies = @dependencies
+
+      @io.open do |stream|
+        while !stream.eof?
+          line = stream.readline
+          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?(?:[^'"\)]+)?)?\1\)?(?:[^?;]+)?;?/im.match(line)
+
+          if matches
+            dependencies.push(Juicer::CSS.new(Juicer::IOProxy.load(matches[2])))
+          end
+        end
+      end
+
+      dependencies.concat(@dependencies)
     end
 
     #
