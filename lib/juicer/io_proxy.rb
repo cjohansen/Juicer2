@@ -44,7 +44,10 @@ module Juicer
       begin
         results = yield @stream if block_given?
       ensure
-        @stream.close
+        if !@file.nil?
+          @stream.close
+          @stream = nil
+        end
       end
 
       results
@@ -87,7 +90,7 @@ module Juicer
       end
 
       Juicer::IOProxy.new(ios)
-    rescue StandardError => err
+    rescue ArgumentError => err
       raise err
     end
   end

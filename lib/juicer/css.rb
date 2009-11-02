@@ -1,4 +1,5 @@
 require "juicer/io_proxy"
+require "fileutils"
 
 module Juicer
   #
@@ -107,6 +108,11 @@ module Juicer
       else
         @io = Juicer::IOProxy.load(args[0], @options[:load_path])
       end
+    rescue ArgumentError
+      raise ArgumentError.new(<<-MSG)
+      Argument(s) to Juicer::CSS#new needs to be one of: Juicer::IOProxy instance,
+      a string, a file name or an IO object.
+      MSG
     end
 
     #
@@ -152,17 +158,25 @@ module Juicer
     # avoid loading dependencies twice.
     #
     def read(options = {})
-      @io.open { |stream| stream.read }
+      @io.open { |stream| stream.rewind && stream.read }
     end
 
     #
     # Export the CSS contents to an output. The output is wrapped in a
     # <tt>Juicer::IOProxy</tt> object, meaning you can provide it any one of the
     # inputs <tt>Juicer::IOProxy.new</tt> accepts. The options hash is passed to
-    # #read, refer to its documentation for possible options to provide.
+    # #read, refer to its documentation for possible options to provide. If a
+    # string is passed to #export, it is used as a file name (i.e., if you want
+    # to write to a string, pass a StringIO instance).
     #
     def export(stream_like, options = {})
-      Juicer::IOProxy.open(stream_like, "w") { |ios| ios.write(read(options)) }
+      if stream_like.is_a?(String)
+        FileUtils.touch(stream_like)
+      end
+
+      Juicer::IOProxy.open(stream_like, "w+") { |ios| ios.write(read(options)) }
+    rescue ArgumentError => err
+      raise ArgumentError.new("Invalid stream argument, #{stream_like}: #{err.message}")
     end
 
     #
@@ -211,6 +225,8 @@ module Juicer
     def self.open(stream_like)
       return stream_like if stream_like.is_a?(Juicer::CSS)
       Juicer::CSS.new(stream_like)
+    rescue ArgumentError => err
+      raise err
     end
   end
 end

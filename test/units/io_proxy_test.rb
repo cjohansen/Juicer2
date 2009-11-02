@@ -67,6 +67,13 @@ class IOProxyTest < Test::Unit::TestCase
 
       assert_equal contents, ios.open { |stream| stream.read }
     end
+
+    should "not close streams not created inside #open" do
+      stream = StringIO.new
+      Juicer::IOProxy.open(stream)
+
+      assert !stream.closed?
+    end
   end
 
   context "loading IOProxy resources" do
