@@ -228,8 +228,7 @@ module Juicer
       source.open do |stream|
         while !stream.eof?
           line = stream.readline
-
-          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?(?:[^'"\)]+)?)?\1\)?(?:[^?;]+)?;?/im.match(line)
+          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
 
           if matches
             io = Juicer::IOProxy.load(matches[2])
