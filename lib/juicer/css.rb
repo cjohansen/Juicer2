@@ -86,6 +86,7 @@ module Juicer
   #
   class CSS
     include Juicer::Loggable
+    attr_reader :io
 
     #
     # Creates a new CSS resource. Accepts a wide variety of input options:
@@ -144,7 +145,7 @@ module Juicer
     # refer to its documentation for possible options.
     #
     def resources(options = {})
-      [self] + dependencies(options)
+      dependencies(options) + [self]
     end
 
     #
@@ -202,6 +203,15 @@ module Juicer
     def inspect
       filename = file.nil? ? "[unsaved]" : "\"#{file}\""
       "#<#{self.class}:#{filename}>"
+    end
+
+    #
+    # Two <tt>Juicer::CSS</tt> instances are equal if they share the same
+    # <tt>Juicer::IOProxy</tt> object as well as all dependencies
+    #
+    def ==(other)
+      return false if io != other.io
+      dependencies == other.dependencies
     end
 
     #

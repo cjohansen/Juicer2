@@ -228,5 +228,25 @@ class CSSTest < Test::Unit::TestCase
         assert_match /ERROR -- : Encountered an error/, @log.rewind && @log.read
       end
     end
+
+    context "through resources" do
+      should "include self in returned set" do
+        css = Juicer::CSS.new
+
+        assert_equal [css], css.resources
+      end
+
+      should "include self after all dependencies" do
+        css = Juicer::CSS.new(<<-CSS)
+          @import url(#{@files[0]});
+          @import url(#{@files[1]});
+        CSS
+
+        css << @files[2]
+        expected = @files.collect { |f| Juicer::CSS.new(f) } + [css]
+
+        assert_equal expected, css.resources
+      end
+    end
   end
 end
