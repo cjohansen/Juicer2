@@ -186,8 +186,8 @@ class CSSTest < Test::Unit::TestCase
         File.open(@files[1], "w") { |f| f.puts "@import url('#{@files[0]}');" }
 
         @css = Juicer::CSS.new(<<-CSS)
-          @import "#{@files[1]}"
-          @import  '#{@files[2]}';
+          @import url("#{@files[1]}") 
+          @import  url(#{@files[2]}) tv;
         CSS
       end
 
@@ -203,6 +203,29 @@ class CSSTest < Test::Unit::TestCase
         actual = @css.dependencies(:recursive => true).collect { |dep| dep.file }
 
         assert_equal expected, actual
+      end
+    end
+
+    context "from bad syntax" do
+      setup do
+        @log = StringIO.new
+        Juicer.log = Logger.new(@log)
+        @css = Juicer::CSS.new(<<-CSS)
+          @import url( #{@files[0]} );
+          @import url(#{@files[1]});
+        CSS
+      end
+
+      should "not choke" do
+        assert_nothing_raised do
+          assert_equal 1, @css.dependencies.length
+        end
+      end
+
+      should "log error and continue" do
+        @css.dependencies
+
+        assert_match /ERROR -- : Encountered an error/, @log.rewind && @log.read
       end
     end
   end

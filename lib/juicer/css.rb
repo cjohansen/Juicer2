@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 require "juicer/io_proxy"
+require "juicer/logger"
 require "fileutils"
 
 module Juicer
@@ -84,6 +85,8 @@ module Juicer
   # License::   BSD
   #
   class CSS
+    include Juicer::Loggable
+
     #
     # Creates a new CSS resource. Accepts a wide variety of input options:
     # * A file name of an existing CSS file
@@ -228,16 +231,21 @@ module Juicer
       source.open do |stream|
         while !stream.eof?
           line = stream.readline
-          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
+          begin
+            matches = /^\s*@import(?:\s+url\(|\s+)?(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
 
-          if matches
-            io = Juicer::IOProxy.load(matches[2])
-            content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
+            if matches
+              io = Juicer::IOProxy.load(matches[2])
+              content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
 
-            if !@_ios.include?(io)
-              @_ios.push(io)
-              @_deps.push(Juicer::CSS.new(io))
+              if !@_ios.include?(io)
+                @_ios.push(io)
+                @_deps.push(Juicer::CSS.new(io))
+              end
             end
+          rescue RegexpError => err
+            log.error "Encountered an error when extracting dependencies from #{line.strip}" +
+                      "This might indicate a syntax error or possibly a bug in Juicer. Please investigate."
           end
         end
       end

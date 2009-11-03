@@ -38,6 +38,9 @@ module Juicer
       end
     end
 
+    #
+    # Yields an io object
+    #
     def open
       if !@path.nil?
         @stream = File.open(file, @mode)

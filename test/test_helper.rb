@@ -9,11 +9,14 @@ begin
   require 'fileutils'
   require 'stringio'
   require 'juicer'
+  require 'juicer/logger'
 rescue LoadError => err
   puts "To run the Juicer test suite you need Test::Unit, shoulda, mocha, fakefs and open-uri"
   puts err
   exit
 end
+
+Juicer.log = Logger.new(StringIO.new)
 
 # These two methods don't work on 1.8.7 for some reason
 #
