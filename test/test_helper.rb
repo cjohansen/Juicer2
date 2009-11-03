@@ -16,14 +16,12 @@ rescue LoadError => err
 end
 
 # These two methods don't work on 1.8.7 for some reason
+#
+# TODO: Fix FakeFS proper and get these outta here
 class FakeFS::File
   if !File.respond_to?(:mtime)
     def self.mtime(*args)
       Time.now
-    end
-
-    def rewind
-      0
     end
   end
 end

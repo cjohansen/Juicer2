@@ -157,17 +157,53 @@ class CSSTest < Test::Unit::TestCase
       assert_equal 3, css.dependencies.length
     end
 
-    should "load dependencies from CSS imports" do
-      css = Juicer::CSS.new(<<-CSS)
-        @import "#{@files[0]}"
-        @import url('#{@files[1]}');
-        @import  '#{@files[2]}';
-      CSS
+    context "from single level of CSS imports" do
+      setup do
+        @css = Juicer::CSS.new(<<-CSS)
+          @import "#{@files[0]}"
+          @import url('#{@files[1]}');
+          @import  '#{@files[2]}';
+        CSS
 
-      expected = @files.collect { |f| File.expand_path(f) }
-      actual = css.dependencies.collect { |dep| dep.file }
+        @expected = @files.collect { |f| File.expand_path(f) }
+      end
+      
+      should "load dependencies" do
+        actual = @css.dependencies.collect { |dep| dep.file }
 
-      assert_equal expected, actual
+        assert_equal @expected, actual
+      end
+
+      should "load dependencies recursively" do
+        actual = @css.dependencies(:recursive => true).collect { |dep| dep.file }
+
+        assert_equal @expected, actual
+      end
+    end
+
+    context "from nested CSS imports" do
+      setup do
+        File.open(@files[1], "w") { |f| f.puts "@import url('#{@files[0]}');" }
+
+        @css = Juicer::CSS.new(<<-CSS)
+          @import "#{@files[1]}"
+          @import  '#{@files[2]}';
+        CSS
+      end
+
+      should "load direct dependencies" do
+        expected = [@files[1], @files[2]].collect { |f| File.expand_path(f) }
+        actual = @css.dependencies.collect { |dep| dep.file }
+
+        assert_equal expected, actual
+      end
+
+      should "load nested dependencies" do
+        expected = @files.collect { |f| File.expand_path(f) }
+        actual = @css.dependencies(:recursive => true).collect { |dep| dep.file }
+
+        assert_equal expected, actual
+      end
     end
   end
 end

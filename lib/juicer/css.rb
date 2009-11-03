@@ -128,14 +128,11 @@ module Juicer
     # can exist anywhere on <tt>Juicer.load_path</tt>, not necessarily in the
     # current directory.
     #
-    # If a block is given, each dependency is yielded to the block. The block
-    # may exclude certain dependencies by returning false. Any non-false return
-    # value from the block includes the file in the returned collection.
-    #
     def dependencies(options = {})
+      options = { :recursive => false }.merge(options)
       @_deps = []
       @_ios = []
-      content_dependencies(@io).concat(@dependencies)
+      content_dependencies(@io, options[:recursive]).concat(@dependencies)
     end
 
     #
@@ -227,15 +224,16 @@ module Juicer
     end
 
     private
-    def content_dependencies(source)
+    def content_dependencies(source, recursive)
       source.open do |stream|
         while !stream.eof?
           line = stream.readline
+
           matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?(?:[^'"\)]+)?)?\1\)?(?:[^?;]+)?;?/im.match(line)
 
           if matches
             io = Juicer::IOProxy.load(matches[2])
-            content_dependencies(io) if !@_ios.include?(io)
+            content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
 
             if !@_ios.include?(io)
               @_ios.push(io)
