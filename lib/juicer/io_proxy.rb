@@ -12,20 +12,22 @@ module Juicer
   # License::   BSD
   #
   class IOProxy
-    attr_reader :file, :stream
+    attr_reader :stream, :path, :dir
 
     #
     # Creates a new Juicer::IOProxy. Accepts strings, IO streams and file names.
     # If no argument is provided, the IOProxy will wrap a StringIO
     #
-    def initialize(stream_like = nil, mode = "r+")
+    def initialize(stream_like = nil, mode = "r+", dir = nil)
       @mode = mode || "r+"
-      @file = nil
+      @path = nil
+      @dir = nil
 
       if stream_like.nil?
         @stream = StringIO.new("", @mode)
-      elsif is_file?(stream_like)
-        @file = stream_like
+      elsif is_file?(stream_like, dir)
+        @path = stream_like
+        @dir = dir
         @stream = nil
       elsif stream_like.respond_to?(:read)
         @stream = stream_like
@@ -37,8 +39,8 @@ module Juicer
     end
 
     def open
-      if !@file.nil?
-        @stream = File.open(@file, @mode)
+      if !@path.nil?
+        @stream = File.open(file, @mode)
       end
 
       results = nil
@@ -46,7 +48,7 @@ module Juicer
       begin
         results = yield @stream if block_given?
       ensure
-        if !@file.nil?
+        if !@path.nil?
           @stream.close
           @stream = nil
         end
@@ -60,18 +62,20 @@ module Juicer
       ios.open(&block)
     end
 
+    def file
+      return nil if @path.nil?
+      File.expand_path(@dir.nil? ? @path : File.join(@dir, @path))
+    end
+
     def inspect
-      "Juicer::IOProxy<#{@file || @stream}>"
+      "Juicer::IOProxy<#{@path || @stream}>"
     end
 
     def ==(other)
-      if !file.nil? && other.respond_to?(:file)
-        return File.expand_path(file) == File.expand_path(other.file)
-      end
-
+      return file == other.file if !file.nil? && other.respond_to?(:file)
       other.respond_to?(:stream) && !stream.nil? && stream == other.stream
     end
-    
+
     #
     # Loads a Juicer::IOProxy object. If the provided input is a string it's treated
     # as a file name, and #load looks for the file on disk. The file may appear
@@ -93,10 +97,11 @@ module Juicer
     def self.load(ios, load_path = nil)
       return ios if ios.is_a?(Juicer::IOProxy)
       load_path ||= Juicer.load_path
+      path = nil
 
       if ios.is_a?(String) && ios !~ /\n/
         path = load_path.find { |path| File.exists?(File.join(path, ios)) }
-        ios = File.join(path, ios) unless path.nil?
+        return Juicer::IOProxy.new(ios, nil, path) unless path.nil?
       end
 
       Juicer::IOProxy.new(ios)
@@ -105,8 +110,9 @@ module Juicer
     end
 
     private
-    def is_file?(stream_like)
-      stream_like.is_a?(String) && stream_like !~ /\n/ && File.exists?(stream_like)
+    def is_file?(stream_like, dir = nil)
+      path = dir.nil? ? stream_like : File.join(dir, stream_like)
+      stream_like.is_a?(String) && stream_like !~ /\n/ && File.exists?(path)
     end
   end
 end
