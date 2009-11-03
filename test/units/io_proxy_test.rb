@@ -121,4 +121,43 @@ class IOProxyTest < Test::Unit::TestCase
       end
     end
   end
+
+  context "proxy instances" do
+    should "define equality for streams" do
+      stream = StringIO.new
+      io = Juicer::IOProxy.new(stream)
+      io2 = Juicer::IOProxy.new(stream)
+
+      assert_equal io, io2
+    end
+
+    should "define equality for files" do
+      filename = "some_file.txt"
+      FileUtils.touch(filename)
+      io = Juicer::IOProxy.new(filename)
+      io2 = Juicer::IOProxy.new(filename)
+      File.delete(filename)
+
+      assert_equal io, io2
+    end
+
+    should "not define unequal files as equal" do
+      filename = "some_file.txt"
+      FileUtils.touch(filename)
+      io = Juicer::IOProxy.new(filename)
+      File.delete(filename)
+      filename = "some_other_file.txt"
+      FileUtils.touch(filename)
+      io2 = Juicer::IOProxy.new(filename)
+      File.delete(filename)
+
+      assert_not_equal io, io2
+    end
+
+    should "not fail when checking equality with unsupported types" do
+      assert_nothing_raised do
+        assert_false Juicer::IOProxy.new == []
+      end
+    end
+  end
 end

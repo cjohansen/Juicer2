@@ -133,20 +133,9 @@ module Juicer
     # value from the block includes the file in the returned collection.
     #
     def dependencies(options = {})
-      dependencies = []
-
-      @io.open do |stream|
-        while !stream.eof?
-          line = stream.readline
-          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?(?:[^'"\)]+)?)?\1\)?(?:[^?;]+)?;?/im.match(line)
-
-          if matches
-            dependencies.push(Juicer::CSS.new(Juicer::IOProxy.load(matches[2])))
-          end
-        end
-      end
-
-      dependencies.concat(@dependencies)
+      @_deps = []
+      @_ios = []
+      content_dependencies(@io).concat(@dependencies)
     end
 
     #
@@ -168,7 +157,7 @@ module Juicer
     def read(options = {})
       @io.open { |stream| stream.rewind && stream.read }
     end
-
+    
     #
     # Export the CSS contents to an output. The output is wrapped in a
     # <tt>Juicer::IOProxy</tt> object, meaning you can provide it any one of the
@@ -235,6 +224,28 @@ module Juicer
       Juicer::CSS.new(stream_like)
     rescue ArgumentError => err
       raise err
+    end
+
+    private
+    def content_dependencies(source)
+      source.open do |stream|
+        while !stream.eof?
+          line = stream.readline
+          matches = /^\s*@import(?:\s+url\(|\s+)(['"]?)([^\?'"\)\s]+)(\?(?:[^'"\)]+)?)?\1\)?(?:[^?;]+)?;?/im.match(line)
+
+          if matches
+            io = Juicer::IOProxy.load(matches[2])
+            content_dependencies(io) if !@_ios.include?(io)
+
+            if !@_ios.include?(io)
+              @_ios.push(io)
+              @_deps.push(Juicer::CSS.new(io))
+            end
+          end
+        end
+      end
+
+      @_deps
     end
   end
 end

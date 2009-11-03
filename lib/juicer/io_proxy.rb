@@ -12,7 +12,7 @@ module Juicer
   # License::   BSD
   #
   class IOProxy
-    attr_reader :file
+    attr_reader :file, :stream
 
     #
     # Creates a new Juicer::IOProxy. Accepts strings, IO streams and file names.
@@ -64,6 +64,14 @@ module Juicer
       "Juicer::IOProxy<#{@file || @stream}>"
     end
 
+    def ==(other)
+      if !file.nil? && other.respond_to?(:file)
+        return File.expand_path(file) == File.expand_path(other.file)
+      end
+
+      other.respond_to?(:stream) && !stream.nil? && stream == other.stream
+    end
+    
     #
     # Loads a Juicer::IOProxy object. If the provided input is a string it's treated
     # as a file name, and #load looks for the file on disk. The file may appear
