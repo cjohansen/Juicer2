@@ -15,6 +15,19 @@ rescue LoadError => err
   exit
 end
 
+# These two methods don't work on 1.8.7 for some reason
+class FakeFS::File
+  if !File.respond_to?(:mtime)
+    def self.mtime(*args)
+      Time.now
+    end
+
+    def rewind
+      0
+    end
+  end
+end
+
 if RUBY_VERSION < '1.9'
   begin
     require 'redgreen'
