@@ -156,7 +156,13 @@ module Juicer
     # avoid loading dependencies twice.
     #
     def read(options = {})
-      @io.open { |stream| stream.rewind && stream.read }
+      contents = ""
+
+      if options[:inline_dependencies]
+        dependencies(options).each { |dep| contents << dep.read }
+      end
+
+      contents << @io.open { |stream| stream.rewind && stream.read }
     end
     
     #
@@ -180,9 +186,12 @@ module Juicer
     #
     # Concatenates the CSS resource with all dependencies and returns the full
     # listing. Equivalent to calling <tt>read(:inline_dependencies => true)</tt>
+    # In contrast to <tt>dependencies</tt>, <tt>concat</tt> defaults to
+    # <tt>:recursive => true</tt>, i.e., include all nested dependencies, not
+    # just direct ones.
     #
     def concat(options = {})
-      read(options.merge(:inline_dependencies => true))
+      read(options.merge(:inline_dependencies => true, :recursive => true))
     end
 
     #
@@ -239,8 +248,11 @@ module Juicer
     private
     def content_dependencies(source, recursive)
       source.open do |stream|
+        stream.rewind
+
         while !stream.eof?
           line = stream.readline
+
           begin
             matches = /^\s*@import(?:\s+url\(|\s+)?(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
 
