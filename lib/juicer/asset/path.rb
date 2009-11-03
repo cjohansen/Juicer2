@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 require "pathname"
 require "juicer/cache_buster"
 

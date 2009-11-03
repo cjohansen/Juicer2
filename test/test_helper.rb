@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 begin
   require 'test/unit'
   require 'shoulda'

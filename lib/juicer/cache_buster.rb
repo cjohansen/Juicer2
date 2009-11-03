@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 module Juicer
   #
   # Assists in creating filenames that reflect the last change to the file. These

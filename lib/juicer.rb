@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Juicer is a command line tool aimed at frontend web developers. It provides a
 # utility belt for managing dependencies for CSS and JavaScript, concatenating
 # and minifying files as well as a number of additional helpful tools, including
