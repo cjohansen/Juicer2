@@ -156,7 +156,7 @@ class IOProxyTest < Test::Unit::TestCase
 
     should "not fail when checking equality with unsupported types" do
       assert_nothing_raised do
-        assert_false Juicer::IOProxy.new == []
+        assert Juicer::IOProxy.new != []
       end
     end
   end
