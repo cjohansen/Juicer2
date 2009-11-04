@@ -40,6 +40,15 @@ class CSSTest < Test::Unit::TestCase
     end
   end
 
+  context "adding dependencies" do
+    should "be possible through import" do
+      css = Juicer::CSS.new
+      css.import(Juicer::CSS.new)
+
+      assert_equal 1, css.dependencies.length
+    end
+  end
+
   context "concatenating files" do
     setup do
       @files = %w[myfile.css some/other/file.css third.css]

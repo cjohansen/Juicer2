@@ -110,7 +110,7 @@ module Juicer
         matches = /^\s*@import(?:\s+url\(|\s+)?(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
         return matches[2] if matches
       end
-      
+
       throw(:done) if !@inside_comment && line =~ /^\s*[\.\#a-zA-Z\:]/
     end
   end
