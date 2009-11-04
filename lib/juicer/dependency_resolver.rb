@@ -21,7 +21,7 @@ module Juicer
   # the including class (e.g. <tt>Resource</tt> in this example) for you
   #   resource.depend("myfile.txt")
   #
-  # <tt>&lt;&lt;</tt> is an alias for depend
+  # <tt><<</tt> is an alias for depend
   #   resource << "myfile.txt"
   #
   # List all dependencies
@@ -29,39 +29,6 @@ module Juicer
   #
   # List all resources. This includes self in the list:
   #   resource.resources #=> [#<Juicer::Resource:[unsaved]>, #<Juicer::Resource:"myfile.txt">]
-  #
-  # Export the resource to a file. Will include dependency statements for any
-  # dependencies
-  #   file = File.open("myfile.txt", "w")
-  #   resource.export(file)
-  #   file.close
-  #
-  # If you'd rather include the contents of the dependencies inline you can
-  # specify the <tt>:inline_dependencies = true</tt> option. In this case, the
-  # dependency statements in the original source are removed.
-  #   resource.export(file, :inline_dependencies => true)
-  #
-  # There are a few alternative ways to export contents:
-  #
-  # Write to open file handler
-  #   File.open("myfile.txt", "w")
-  #   resource.export(file)
-  #   file.close
-  #
-  # Export to filename, analogous to above example
-  #   resource.export("myfile.txt")
-  #
-  # Export in <tt>File.open</tt> block
-  #   File.open("myfile.txt", "w") { |f| resource.export(f) }
-  #
-  # Read contents from resource
-  #   File.open("myfile.txt", "w") { |f| f.write(resource.read) }
-  #
-  # <tt>concat</tt> is an alias to <tt>read(:inline_dependencies => true, :recursive => true)</tt>
-  #   File.open("myfile.txt", "w") { |f| f.write(resource.concat) }
-  #
-  # Of course, any IO stream is acceptable
-  #   resource.export(StringIO.new)
   #
   # Wrap an existing CSS resource in a <tt>Juicer::CSS</tt> instance
   #   css = Juicer::CSS.new("myfile.css")

@@ -297,8 +297,11 @@ class CSSTest < Test::Unit::TestCase
 
     should "concatenate nested dependencies with concat" do
       css = Juicer::CSS.new
-      css.expects(:read).with(:inline_dependencies => true, :recursive => true)
-      css.concat
+      contents = "some merged content"
+      css.expects(:read).with(:inline_dependencies => true, :recursive => true).returns(contents)
+      result = css.concat
+
+      assert_equal contents, result.read
     end
 
     should "concatenate deeply nested dependencies" do
@@ -308,7 +311,7 @@ class CSSTest < Test::Unit::TestCase
       File.open(@files[1], "w") { |f| f.print(contents1) }
       css = Juicer::CSS.new(@files[2])
 
-      assert_equal "#{@files[0]}\n#{contents1}#{contents2}", css.concat
+      assert_equal "#{@files[0]}\n#{contents1}#{contents2}", css.concat.read
     end
   end
 end

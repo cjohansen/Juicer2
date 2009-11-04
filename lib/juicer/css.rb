@@ -2,6 +2,7 @@
 
 require "juicer/io_proxy_wrapper"
 require "juicer/dependency_resolver"
+require "juicer/concat"
 require "juicer/logger"
 
 module Juicer
@@ -31,7 +32,7 @@ module Juicer
   # <tt>import</tt> is an alias for <tt>depend</tt>
   #   css.import "myfile.css"
   #
-  # ...as is <tt>&lt;&lt;</tt>
+  # ...as is <tt><<</tt>
   #   css << "myfile.css"
   #
   # List all dependencies
@@ -85,9 +86,10 @@ module Juicer
   # License::   BSD
   #
   class CSS
-    include Juicer::Loggable
-    include Juicer::DependencyResolver
     include Juicer::IOProxyWrapper
+    include Juicer::DependencyResolver
+    include Juicer::Concat
+    include Juicer::Loggable
 
     alias import depend
   end
