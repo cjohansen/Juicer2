@@ -154,10 +154,10 @@ module Juicer
 
               if result
                 io = Juicer::IOProxy.load(result)
-                content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
 
                 if !@_ios.include?(io)
                   @_ios.push(io)
+                  content_dependencies(io, recursive) if recursive
                   @_deps.push(self.class.new(io))
                 end
               end

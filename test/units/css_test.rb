@@ -204,6 +204,20 @@ class CSSTest < Test::Unit::TestCase
 
         assert_equal expected, actual
       end
+
+      should "not load circular dependencies" do
+        File.open(@files[2], "w") { |f| f.puts "@import url('#{@files[0]}');\n@import url('#{@files[1]}');" }
+        File.open(@files[1], "w") { |f| f.puts "@import url('#{@files[2]}');" }
+
+        css = Juicer::CSS.new(<<-CSS)
+          @import  url(#{@files[2]}) tv;
+          @import url("#{@files[1]}")
+        CSS
+
+        actual = css.dependencies(:recursive => true).collect { |dep| dep.path }
+
+        assert_equal @files, actual
+      end
     end
 
     context "from CSS with comments" do
