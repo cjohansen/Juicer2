@@ -143,25 +143,30 @@ module Juicer
     def content_dependencies(source, recursive)
       source.open do |stream|
         stream.rewind
+        line_num = 0
 
-        while !stream.eof?
-          line = stream.readline
+        catch(:done) do
+          while !stream.eof?
+            line = stream.readline
 
-          begin
-            matches = /^\s*@import(?:\s+url\(|\s+)?(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
+            begin
+              result = scan_for_dependencies(line)
 
-            if matches
-              io = Juicer::IOProxy.load(matches[2])
-              content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
+              if result
+                io = Juicer::IOProxy.load(result)
+                content_dependencies(io, recursive) if !@_ios.include?(io) && recursive
 
-              if !@_ios.include?(io)
-                @_ios.push(io)
-                @_deps.push(Juicer::CSS.new(io))
+                if !@_ios.include?(io)
+                  @_ios.push(io)
+                  @_deps.push(self.class.new(io))
+                end
               end
+            rescue RegexpError => err
+              log.error "Encountered an error when extracting dependencies from #{source}:#{line_num}:\n#{line.strip}\n\n" +
+                "This might indicate a syntax error or possibly a bug in Juicer. Please investigate."
             end
-          rescue RegexpError => err
-            log.error "Encountered an error when extracting dependencies from #{line.strip}" +
-                      "This might indicate a syntax error or possibly a bug in Juicer. Please investigate."
+
+            line_num += 1
           end
         end
       end

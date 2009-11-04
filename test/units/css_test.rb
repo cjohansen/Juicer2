@@ -206,6 +206,27 @@ class CSSTest < Test::Unit::TestCase
       end
     end
 
+    context "from CSS with comments" do
+      setup do
+        @css = Juicer::CSS.new(<<-CSS)
+          /**
+           * Bla bla
+           */
+          /*@import  url(#{@files[2]}) tv;*/
+          @import url("#{@files[1]}");
+          /* @import  url(#{@files[0]}); */
+          /* These imports are not going in
+          @import  url(#{@files[0]});
+          @import  url(#{@files[2]});
+          *//* Neither is this: @import url(#{@files[2]});*/
+        CSS
+      end
+
+      should "load dependencies not commented out" do
+        assert_equal [@files[1]], @css.dependencies.collect { |d| d.path }
+      end
+    end
+
     context "from bad syntax" do
       setup do
         @log = StringIO.new

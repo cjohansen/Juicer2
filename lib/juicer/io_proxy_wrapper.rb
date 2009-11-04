@@ -68,6 +68,15 @@ module Juicer
       io.file
     end
 
+    #
+    # Returns the relative path to the file the resource wraps, if any. If the
+    # resource does not wrap a file (i.e., it's an io stream, or string), the
+    # method returns <tt>nil</tt>.
+    #
+    def path
+      io.path
+    end
+
     module ClassMethods
       #
       # Open an instance. If input is already an instance of the including class,

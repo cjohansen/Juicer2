@@ -92,5 +92,26 @@ module Juicer
     include Juicer::Loggable
 
     alias import depend
+
+    protected
+    def scan_for_dependencies(line)
+      @inside_comment = false if @inside_comment.nil?
+      line = line.gsub(%r[/\*.*\*/], "")
+
+      previous = nil
+      line.split("").each do |char|
+        @inside_comment = true if "#{previous}#{char}" == "/*"
+        @inside_comment = false if "#{previous}#{char}" == "*/"
+        previous = char
+      end
+
+      if !@inside_comment
+        line.sub!(%r[.*\*/], "")
+        matches = /^\s*@import(?:\s+url\(|\s+)?(['"]?)([^\?'"\)\s]+)(\?[^'"\)]*)?\1\)?(?:[^?;]*);?/im.match(line)
+        return matches[2] if matches
+      end
+      
+      throw(:done) if !@inside_comment && line =~ /^\s*[\.\#a-zA-Z\:]/
+    end
   end
 end
