@@ -4,7 +4,12 @@ require "logger"
 
 module Juicer
   def self.log
-    @@log ||= Logger.new($stdout)
+    if !defined?(@@log) || @@log.nil?
+      @@log = Logger.new($stdout)
+      @@log.level = Logger::WARN
+    end
+
+    @@log
   end
 
   def self.log=(log)
