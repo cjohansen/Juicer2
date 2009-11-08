@@ -3,6 +3,7 @@
 require "juicer"
 require "juicer/logger"
 require "juicer/command"
+require "juicer/io_proxy"
 require "trollop"
 
 module Juicer
@@ -49,6 +50,7 @@ module Juicer
       fail_gracefully do
         klass = Juicer::Command.load(args.shift)
         @cmd = klass.new(args) unless klass.nil?
+        @args = args
       end
     end
 
@@ -78,6 +80,23 @@ module Juicer
       log.error(err.message)
       log.debug(err.backtrace.join("\n"))
       exit
+    end
+
+    class InputArgs
+      def initialize(*args)
+        @files = args.flatten.collect do |f|
+          raise ArgumentError.new("Input file #{f} does not exist") if !File.exists?(f)
+          Juicer::IOProxy.new(f)
+        end
+      end
+
+      def type
+        @files.first && @files.first.file.split(".").pop
+      end
+
+      def to_a
+        @files.length > 0 ? @files : [Juicer::IOProxy.new($stdin)]
+      end
     end
   end
 end

@@ -2,6 +2,7 @@
 
 require "juicer/cli"
 require "juicer/io_proxy"
+require "fileutils"
 
 module Juicer
   #
@@ -12,22 +13,25 @@ module Juicer
   module Command
     class Concat
       include Juicer::Loggable
+      attr_reader :output, :type
 
       def initialize(args = nil)
-        opts = Trollop::options(args) do
+        args = args.split(" ") if args.is_a?(String)
+
+        opts = Trollop::options(args || []) do
           banner "Resolve dependencies and concatenate files"
           opt :output, "File to write concatenated contents to", :default => nil, :type => :string
-          opt :type, "css or javascript. Not necessary to specify when using files", :default => "css"
+          opt :type, "css or javascript. Not necessary to specify when using files", :default => nil, :type => :string
         end
 
-        @output = Juicer::IOProxy.new(opts[:output] || $stdout, "w")
+        @output = opts[:output] || $stdout
         @type = opts[:type]
-        @files = args
       end
 
-      def execute
-        input = Juicer::Cli.file_input(args)
-        asset = Juicer.load_lib(input.type).new(input.to_a)
+      def execute(args = nil)
+        input = Juicer::Cli::InputArgs.new(args)
+        type = @type || input.type == "js" ? ["javascript", "JavaScript"] : ["css", "CSS"]
+        asset = Juicer.load_lib(*type).new(input.to_a)
         asset.export(@output, :inline_dependencies => true)
       end
     end

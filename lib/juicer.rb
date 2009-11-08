@@ -103,16 +103,17 @@ module Juicer
     @@env = env
   end
 
-  def self.load_lib(lib)
+  def self.load_lib(lib, klass_name = nil)
     lib = lib.split("/") if lib.is_a?(String)
     path = self.lib_path(lib)
     return nil unless File.exists?(path)
 
     Kernel.require(path)
     mod = Juicer
+    klass_name ||= lib[-1]
 
-    lib.each do |lib_mod|
-      klass = lib_mod.split("_").inject("") { |str, piece| str + piece.capitalize }
+    (lib[0...-1] << klass_name).each do |lib_mod|
+      klass = lib_mod !~ /_/ ? lib_mod : lib_mod.split("_").inject("") { |str, piece| str + piece.capitalize }
 
       if !mod.const_defined?(klass)
         raise "Unable to load #{lib.join('/')}:\n#{path} exists but does not define class #{mod.to_s}::#{klass}"
