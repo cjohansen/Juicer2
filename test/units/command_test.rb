@@ -3,7 +3,7 @@
 require "test_helper"
 require "juicer/command"
 
-class CliTest < Test::Unit::TestCase
+class CommandTest < Test::Unit::TestCase
   context "loading commands" do
     should "load lib via Juicer.load_lib" do
       Juicer.expects("load_lib").with("command/mycmd")
