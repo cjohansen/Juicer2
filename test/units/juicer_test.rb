@@ -52,7 +52,13 @@ class JuicerTest < Test::Unit::TestCase
 
   context "loading libs" do
     setup { @root = File.expand_path(File.join(File.dirname(__FILE__), "../../lib/juicer")) }
-    teardown { FileUtils.rm_rf("asset") if File.exists?("asset") }
+
+    teardown do
+      begin
+        FileUtils.rm_rf("asset") if File.exists?("asset")
+      rescue StandardError => err
+      end
+    end
 
     should "compute full lib path" do
       expected = File.join(@root, "some/deeply/nested/path.rb")
@@ -71,6 +77,31 @@ class JuicerTest < Test::Unit::TestCase
         File.open(File.join(@root, "asset/path_resolver.rb"), "w") { |f| f.puts "" }
 
         assert_equal ["path", "path_resolver"], Juicer.list_libs("asset")
+      end
+    end
+
+    context "loading library" do
+      should "return nil if file does not exist" do
+        assert_nil Juicer.load_lib("some/crazy")
+      end
+
+      should "require library" do
+        require "juicer/javascript"
+        lib = "java_script"
+        FakeFS::File.expects("exists?").with("#{@root}/#{lib}.rb").returns(true)
+        Kernel.expects("require").with("#{@root}/#{lib}.rb")
+
+        assert_equal Juicer::JavaScript, Juicer.load_lib(lib)
+      end
+
+      should "raise exception if library file exists, and module does not" do
+        lib = "mylib"
+        FakeFS::File.expects("exists?").with("#{@root}/#{lib}.rb").returns(true)
+        Kernel.expects("require").with("#{@root}/#{lib}.rb")
+
+        assert_raise do
+          Juicer.load_lib(lib)
+        end
       end
     end
   end

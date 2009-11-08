@@ -108,7 +108,7 @@ module Juicer
     path = self.lib_path(lib)
     return nil unless File.exists?(path)
 
-    require(path)
+    Kernel.require(path)
     mod = Juicer
 
     lib.each do |lib_mod|
@@ -121,7 +121,7 @@ module Juicer
       mod = mod.const_get(klass)
     end
 
-    klass
+    mod
   end
 
   def self.list_libs(path)
