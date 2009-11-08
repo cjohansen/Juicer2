@@ -102,4 +102,34 @@ module Juicer
   def self.env=(env)
     @@env = env
   end
+
+  def self.load_lib(lib)
+    lib = lib.split("/") if lib.is_a?(String)
+    path = self.lib_path(lib)
+    return nil unless File.exists?(path)
+
+    require(path)
+    mod = Juicer
+
+    lib.each do |lib_mod|
+      klass = lib_mod.split("_").inject("") { |str, piece| str + piece.capitalize }
+
+      if !mod.const_defined?(klass)
+        raise "Unable to load #{lib.join('/')}:\n#{path} exists but does not define class #{mod.to_s}::#{klass}"
+      end
+
+      mod = mod.const_get(klass)
+    end
+
+    klass
+  end
+
+  def self.list_libs(path)
+    path = path.split("/") if path.is_a?(String)
+    Dir.glob(self.lib_path(path + ["*"])).collect { |file| File.basename(file).sub(/\.rb$/, '') }
+  end
+
+  def self.lib_path(lib)
+    File.join(File.dirname(__FILE__), "juicer/#{lib.join('/')}.rb")
+  end
 end

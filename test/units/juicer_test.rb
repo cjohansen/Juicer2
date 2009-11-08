@@ -50,6 +50,31 @@ class JuicerTest < Test::Unit::TestCase
     end
   end
 
+  context "loading libs" do
+    setup { @root = File.expand_path(File.join(File.dirname(__FILE__), "../../lib/juicer")) }
+    teardown { FileUtils.rm_rf("asset") if File.exists?("asset") }
+
+    should "compute full lib path" do
+      expected = File.join(@root, "some/deeply/nested/path.rb")
+      assert_equal expected, Juicer.lib_path(%w{some deeply nested path})
+    end
+
+    should "compute short lib path" do
+      expected = File.join(@root, "css.rb")
+      assert_equal expected, Juicer.lib_path(["css"])
+    end
+
+    context "listing libraries" do
+      should "return all basenames in a directory" do
+        Dir.mkdir("asset")
+        File.open(File.join(@root, "asset/path.rb"), "w") { |f| f.puts "" }
+        File.open(File.join(@root, "asset/path_resolver.rb"), "w") { |f| f.puts "" }
+
+        assert_equal ["path", "path_resolver"], Juicer.list_libs("asset")
+      end
+    end
+  end
+  
   private
   def create_lib(lib)
     FileUtils.mkdir_p(File.join(Juicer.pkg_dir, "#{lib}/lib"))
