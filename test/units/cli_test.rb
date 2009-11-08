@@ -85,6 +85,12 @@ class CliTest < Test::Unit::TestCase
 
       assert_equal [$stdin], input.to_a.collect { |i| i.stream }
     end
+
+    should "wrap stdin in an array of a single IOProxy object with nil input" do
+      input = Juicer::Cli::InputArgs.new(nil)
+
+      assert_equal [$stdin], input.to_a.collect { |i| i.stream }
+    end
     
     should "use first file in list to guess type" do
       input = Juicer::Cli::InputArgs.new(@files)

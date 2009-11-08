@@ -110,11 +110,9 @@ module Juicer
 
     Kernel.require(path)
     mod = Juicer
-    klass_name ||= lib[-1]
+    lib.collect! { |m| m.split("_").inject("") { |str, piece| str + piece.capitalize } }
 
-    (lib[0...-1] << klass_name).each do |lib_mod|
-      klass = lib_mod !~ /_/ ? lib_mod : lib_mod.split("_").inject("") { |str, piece| str + piece.capitalize }
-
+    (lib[0...-1] << (klass_name || lib[-1])).each do |klass|
       if !mod.const_defined?(klass)
         raise "Unable to load #{lib.join('/')}:\n#{path} exists but does not define class #{mod.to_s}::#{klass}"
       end

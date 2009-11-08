@@ -84,7 +84,7 @@ module Juicer
 
     class InputArgs
       def initialize(*args)
-        @files = args.flatten.collect do |f|
+        @files = args.flatten.reject { |f| f.nil? }.collect do |f|
           raise ArgumentError.new("Input file #{f} does not exist") if !File.exists?(f)
           Juicer::IOProxy.new(f)
         end
