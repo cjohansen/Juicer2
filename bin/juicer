@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require "juicer/cli"
+
+class Logger
+  def format_message(severity, datetime, progname, msg)
+    "#{msg.to_s.gsub(/^\s+/m, '').strip}\n\n"
+  end
+end
+
+Juicer::Cli.new($*).execute
