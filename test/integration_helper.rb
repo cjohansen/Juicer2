@@ -39,8 +39,8 @@ module Juicer
       FileUtils.rm_rf(self.home)
     end
 
-    def self.file_list(files)
-      files.collect { |file| self.file(file) }
+    def self.file_list(*files)
+      files.flatten.collect { |file| self.file(file) }
     end
 
     def self.file(file)
@@ -52,5 +52,26 @@ module Juicer
       File.open(filename, "w") { |f| f.puts(contents) }
       contents
     end
+
+    module Helpers
+      def fake_stdin(contents)
+        stdin = $stdin
+        $stdin = StringIO.new
+        $stdin.write(contents) && $stdin.rewind
+        yield
+        $stdin = stdin
+      end
+
+      def capture_stdout
+        stdout = $stdout
+        $stdout = StringIO.new
+        yield
+        results = $stdout.rewind && $stdout.read
+        $stdout = stdout
+        results
+      end
+    end
   end
 end
+
+include Juicer::Test::Helpers
