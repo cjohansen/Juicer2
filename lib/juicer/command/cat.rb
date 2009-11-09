@@ -11,7 +11,7 @@ module Juicer
   # License::   BSD
   #
   module Command
-    class Concat
+    class Cat
       include Juicer::Loggable
       attr_reader :output, :type
 

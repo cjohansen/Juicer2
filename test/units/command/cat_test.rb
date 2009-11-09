@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 require "test_helper"
-require "juicer/command/concat"
+require "juicer/command/cat"
 
-class ConcatCommandTest < Test::Unit::TestCase
-  context "initializing concat command" do
+class CatCommandTest < Test::Unit::TestCase
+  context "initializing cat command" do
     setup do
       @file = "out.js"
       @type = "css"
@@ -18,30 +18,30 @@ class ConcatCommandTest < Test::Unit::TestCase
       cmd = nil
 
       assert_nothing_raised do
-        cmd = Juicer::Command::Concat.new("--output #{@file} --type=#{@type}")
+        cmd = Juicer::Command::Cat.new("--output #{@file} --type=#{@type}")
       end
     end
 
     should "set type to specified type" do
-      cmd = Juicer::Command::Concat.new(%w[--type js])
+      cmd = Juicer::Command::Cat.new(%w[--type js])
 
       assert_equal "js", cmd.type
     end
 
     should "accept output and type short options" do
       assert_nothing_raised do
-        cmd = Juicer::Command::Concat.new("-o #{@file} -t #{@type}")
+        cmd = Juicer::Command::Cat.new("-o #{@file} -t #{@type}")
       end
     end
 
     should "wrap stdout if no output is given" do
-      cmd = Juicer::Command::Concat.new
+      cmd = Juicer::Command::Cat.new
 
       assert_equal $stdout, cmd.output
     end
   end
 
-  context "concatenating files" do
+  context "catenating files" do
     setup do
       @files = ["file1.js", "file2.js"]
       @output = "out.js"
@@ -68,9 +68,10 @@ class ConcatCommandTest < Test::Unit::TestCase
       File.open(@files[1], "w") { |f| f.puts(file2_contents) }
 
       File.expects(:exists?).at_least(1).returns(true)
+      Juicer::Command.expects("list").returns(["cat"])
 
-      cmd = Juicer::Command::Concat.new("--output #{@output}")
-      cmd.execute("file1.js")
+      cli = Juicer::Cli.new("cat --output #{@output} file1.js")
+      cli.execute
 
       assert_equal file2_contents + file1_contents, File.read(@output)
     end
