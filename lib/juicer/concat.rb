@@ -67,6 +67,8 @@ module Juicer
         dependencies(options).each { |dep| contents << dep.read }
       end
 
+      log.debug("Reading contents of #{self.to_s}")
+
       contents << io.open { |stream| stream.rewind && stream.read }
     end
 

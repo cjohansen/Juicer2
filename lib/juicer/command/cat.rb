@@ -33,7 +33,7 @@ module Juicer
         input = Juicer::Cli::InputArgs.new(args)
         type = @type || input.type == "js" ? ["javascript", "JavaScript"] : ["css", "CSS"]
         asset = Juicer.load_lib(*type).new(input.to_a)
-        asset.export(@output, :inline_dependencies => true)
+        asset.concat(:inline_dependencies => true).export(@output)
       end
     end
   end
