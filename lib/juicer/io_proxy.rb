@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+require "juicer"
 require "stringio"
 
 module Juicer

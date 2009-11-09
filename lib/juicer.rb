@@ -110,7 +110,7 @@ module Juicer
 
     Kernel.require(path)
     mod = Juicer
-    lib.collect! { |m| m.split("_").inject("") { |str, piece| str + piece.capitalize } }
+    lib.collect! { |m| Juicer.class_name_for(m) }
 
     (lib[0...-1] << (klass_name || lib[-1])).each do |klass|
       if !mod.const_defined?(klass)
@@ -130,5 +130,9 @@ module Juicer
 
   def self.lib_path(lib)
     File.join(File.dirname(__FILE__), "juicer/#{lib.join('/')}.rb")
+  end
+
+  def self.class_name_for(name)
+    name.split("_").inject("") { |str, piece| str + piece.capitalize }
   end
 end
