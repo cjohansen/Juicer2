@@ -102,7 +102,7 @@ class CliTest < Test::Unit::TestCase
   context "execute command through cli" do
     should "pass on left-over arguments to the command" do
       file = "file1.js"
-      cli = Juicer::Cli.new("concat #{file}")
+      cli = Juicer::Cli.new("cat #{file}")
       cli.cmd.expects(:execute).with([file])
 
       cli.execute

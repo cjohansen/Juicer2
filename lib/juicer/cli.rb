@@ -13,8 +13,8 @@ module Juicer
   #
   # Usage is just like the actual command line, you can pass arguments as an
   # array or a string:
-  #   Juicer::Cli.new("-v concat file1.js file2.s").execute
-  #   Juicer::Cli.new(%w[-v concat file1.js file2.s]).execute
+  #   Juicer::Cli.new("-v cat file1.js file2.s").execute
+  #   Juicer::Cli.new(%w[-v cat file1.js file2.s]).execute
   #
   # Author::    Christian Johansen (christian@cjohansen.no)
   # Copyright:: Copyright (c) 2009 Christian Johansen
