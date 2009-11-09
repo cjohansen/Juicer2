@@ -22,6 +22,7 @@ module Juicer
   #
   class Cli
     include Juicer::Loggable
+    attr_reader :cmd
 
     #
     # Initialize the command line interface. Parses command line options and

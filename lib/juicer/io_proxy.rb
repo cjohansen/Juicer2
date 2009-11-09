@@ -75,6 +75,10 @@ module Juicer
       "Juicer::IOProxy<#{@path || @stream}>"
     end
 
+    def to_s
+      inspect
+    end
+
     def ==(other)
       return file == other.file if !file.nil? && other.respond_to?(:file)
       other.respond_to?(:stream) && !stream.nil? && stream == other.stream
