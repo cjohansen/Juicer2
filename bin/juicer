@@ -8,4 +8,17 @@ class Logger
   end
 end
 
-Juicer::Cli.new($*).execute
+cli = Juicer::Cli.new($*)
+
+begin
+  cli.execute
+rescue StandardError => err
+  cli.log.fatal(<<-MSG)
+    Juicer encountered an unrecoverable error. If you suspect a bug in Juicer,
+    please report it at http://cjohansen.no/juicer
+  MSG
+
+  cli.log.error(err.message)
+  cli.log.debug(err.backtrace.join("\n"))
+  exit
+end

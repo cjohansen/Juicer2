@@ -47,11 +47,9 @@ module Juicer
                       opts[:verbose] && Logger::INFO ||
                         Logger::WARN
 
-      fail_gracefully do
-        klass = Juicer::Command.load(args.shift)
-        @cmd = klass.new(args) unless klass.nil?
-        @args = args
-      end
+      klass = Juicer::Command.load(args.shift)
+      @cmd = klass.new(args) unless klass.nil?
+      @args = args
     end
 
     #
@@ -59,27 +57,11 @@ module Juicer
     # a human understandable way.
     #
     def execute
-      fail_gracefully do
-        if @cmd.nil?
-          log.warn("No command given, nothing to do") and exit
-        end
-
-        @cmd.execute
+      if @cmd.nil?
+        log.warn("No command given, nothing to do") and exit
       end
-    end
 
-    protected
-    def fail_gracefully
-      yield
-    rescue StandardError => err
-      log.fatal(<<-MSG)
-        Juicer encountered an unrecoverable error. If you suspect a bug in Juicer,
-        please report it at http://cjohansen.no/juicer
-      MSG
-
-      log.error(err.message)
-      log.debug(err.backtrace.join("\n"))
-      exit
+      @cmd.execute(@args)
     end
 
     class InputArgs
