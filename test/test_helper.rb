@@ -37,10 +37,3 @@ class FakeFS::File
     end
   end
 end
-
-if RUBY_VERSION < '1.9'
-  begin
-    require 'redgreen'
-  rescue LoadError
-  end
-end
