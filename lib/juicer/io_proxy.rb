@@ -120,7 +120,7 @@ module Juicer
     private
     def is_file?(stream_like, dir = nil)
       path = dir.nil? ? stream_like : File.join(dir, stream_like)
-      stream_like.is_a?(String) && stream_like !~ /\n/ && File.exists?(path)
+      stream_like.is_a?(String) && stream_like !~ /\n/ && File.exists?(File.expand_path(path))
     end
   end
 end

@@ -108,6 +108,22 @@ class DependencyResolverTest < Test::Unit::TestCase
       end
     end
 
+    context "from files with dependencies in other directories" do
+      setup do
+        @files << "path/file.css"
+        FileUtils.mkdir_p(File.dirname(@files[-1]))
+        FileUtils.touch(@files[-1])
+        @css = Juicer::CSS.new("@import '#{@files[-1]}';")
+      end
+
+      should "load all dependencies" do
+        dependencies = @css.dependencies
+
+        assert_equal 1, dependencies.length
+        assert_equal @files[-1], dependencies.first.path
+      end
+    end
+
     context "from bad syntax" do
       setup do
         @log = StringIO.new

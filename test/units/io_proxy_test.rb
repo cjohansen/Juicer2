@@ -17,6 +17,16 @@ class IOProxyTest < Test::Unit::TestCase
       assert_nil io.instance_eval { @stream }
     end
 
+    should "create file wrapper for file in user home" do
+      file = "~/somefile.css"
+      path = File.expand_path(file)
+      FileUtils.mkdir_p(File.dirname(path))
+      FileUtils.touch(file)
+      io = Juicer::IOProxy.new(file)
+
+      assert_equal file, io.path
+    end
+
     should "create io wrapper" do
       io = StringIO.new
       StringIO.expects(:new).never
