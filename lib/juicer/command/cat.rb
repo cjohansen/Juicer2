@@ -14,12 +14,13 @@ module Juicer
     class Cat
       include Juicer::Loggable
       attr_reader :output, :type
+      DESC = "Resolve dependencies and concatenate files"
 
       def initialize(args = nil)
         args = args.split(" ") if args.is_a?(String)
 
         opts = Trollop::options(args || []) do
-          banner "Resolve dependencies and concatenate files"
+          banner DESC
           opt :output, "File to write concatenated contents to", :default => nil, :type => :string
           opt :type, "css or javascript. Not necessary to specify when using files", :default => nil, :type => :string
         end
