@@ -19,6 +19,7 @@ begin
     gem.add_development_dependency "mocha"
     gem.add_development_dependency "fakefs"
     gem.add_development_dependency "jeweler"
+    gem.add_dependency "trollop"
     #gem.add_dependency "cmdparse"
     #gem.add_dependency "nokogiri"
     #gem.add_dependency "rubyzip"
