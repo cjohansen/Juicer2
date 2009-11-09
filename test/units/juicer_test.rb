@@ -99,7 +99,7 @@ class JuicerTest < Test::Unit::TestCase
         FakeFS::File.expects("exists?").with("#{@root}/#{lib}.rb").returns(true)
         Kernel.expects("require").with("#{@root}/#{lib}.rb")
 
-        assert_raise do
+        assert_raise RuntimeError do
           Juicer.load_lib(lib)
         end
       end

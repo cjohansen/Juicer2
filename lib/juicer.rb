@@ -129,7 +129,7 @@ module Juicer
   end
 
   def self.lib_path(lib)
-    File.join(File.dirname(__FILE__), "juicer/#{lib.join('/')}.rb")
+    File.expand_path(File.join(File.dirname(__FILE__), "juicer/#{lib.join('/')}.rb"))
   end
 
   def self.class_name_for(name)
