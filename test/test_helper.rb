@@ -12,21 +12,6 @@ rescue LoadError => err
   exit
 end
 
-if RUBY_VERSION < "1.9"
-  begin
-    require "redgreen"
-  rescue LoadError => err
-    puts "Install the redgreen gem if you want colored output from tests"
-  end
-end
-
-require 'fileutils'
-require 'stringio'
-require 'juicer'
-require 'juicer/logger'
-
-Juicer.log = Logger.new(StringIO.new)
-
 # These two methods don't work on 1.8.7 for some reason
 #
 # TODO: Fix FakeFS proper and get these outta here
@@ -37,3 +22,5 @@ class FakeFS::File
     end
   end
 end
+
+require "common_test_helper"
